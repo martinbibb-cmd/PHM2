@@ -19,6 +19,7 @@ import mediaRoutes from './routes/media.js';
 import boilersRoutes from './routes/boilers.js';
 import dashboardRoutes from './routes/dashboard.js';
 import usersRoutes from './routes/users.js';
+import publicRoutes from './routes/public.js';
 
 // Load environment variables
 dotenv.config({ path: '../../.env' });
@@ -54,6 +55,9 @@ app.route('/api/media', mediaRoutes);
 app.route('/api/boilers', boilersRoutes);
 app.route('/api/dashboard', dashboardRoutes);
 app.route('/api/users', usersRoutes);
+
+// Public routes (no authentication required)
+app.route('/api/public', publicRoutes);
 
 // 404 handler
 app.notFound((c) => {

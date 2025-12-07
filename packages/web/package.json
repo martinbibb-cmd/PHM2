@@ -22,7 +22,9 @@
     "@tanstack/react-router": "^1.15.14",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "date-fns": "^2.30.0",
     "lucide-react": "^0.312.0",
+    "qrcode": "^1.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.49.3",
@@ -31,6 +33,7 @@
   },
   "devDependencies": {
     "@tanstack/router-vite-plugin": "^1.15.14",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-react": "^4.2.1",

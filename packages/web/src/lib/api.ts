@@ -210,6 +210,16 @@ class ApiClient {
   async duplicateQuote(id: number): Promise<ApiResponse<Quote>> {
     return this.request(`/quotes/${id}/duplicate`, { method: 'POST' });
   }
+
+  // Public endpoints (no auth required)
+  async getPublicVisit(shareId: string): Promise<ApiResponse<any>> {
+    return this.request(`/public/view/${shareId}`);
+  }
+
+  // Visit sharing endpoints
+  async generateVisitShare(visitId: number): Promise<ApiResponse<{ shareId: string; shareUrl: string }>> {
+    return this.request(`/visits/${visitId}/share`, { method: 'POST' });
+  }
 }
 
 export const api = new ApiClient();

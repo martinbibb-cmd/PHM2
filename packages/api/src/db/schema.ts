@@ -156,6 +156,7 @@ export const visitSessions = pgTable('visit_sessions', {
   appointmentId: integer('appointment_id').references(() => appointments.id),
   surveyType: varchar('survey_type', { length: 50 }),
   status: varchar('status', { length: 50 }).default('in_progress').notNull(),
+  shareId: varchar('share_id', { length: 36 }).unique(),
   startedAt: timestamp('started_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
   surveyorId: integer('surveyor_id').references(() => users.id),
