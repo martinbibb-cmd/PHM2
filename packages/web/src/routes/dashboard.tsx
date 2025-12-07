@@ -1,246 +1,171 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { api } from '@/lib/api';
-import { useAuthStore } from '@/stores/authStore';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, FileText, Package, TrendingUp } from 'lucide-react';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '../lib/api';
+import { Card } from '../components/ui/card';
+import { Users, FileText, Calendar, TrendingUp, DollarSign, Activity } from 'lucide-react';
 
 export const Route = createFileRoute('/dashboard')({
-  component: DashboardPage,
-  beforeLoad: ({ context }) => {
-    const isAuthenticated = useAuthStore.getState().isAuthenticated;
-    if (!isAuthenticated) {
-      throw new Error('Not authenticated');
-    }
-  },
+  component: Dashboard,
 });
 
-function DashboardPage() {
-  const navigate = useNavigate();
-  const { user, clearUser } = useAuthStore();
-
-  const logoutMutation = useMutation({
-    mutationFn: () => api.logout(),
-    onSuccess: () => {
-      clearUser();
-      navigate({ to: '/' });
+function Dashboard() {
+  const { data: stats } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: async () => {
+      const response = await api.get('/dashboard/stats');
+      return response;
     },
   });
 
-  const { data: customers } = useQuery({
-    queryKey: ['customers', { page: 1, pageSize: 5 }],
-    queryFn: () => api.getCustomers({ page: 1, pageSize: 5 }),
+  const { data: recentActivity } = useQuery({
+    queryKey: ['dashboard-activity'],
+    queryFn: async () => {
+      const response = await api.get('/dashboard/recent-activity?limit=5');
+      return response;
+    },
   });
 
-  const { data: leads } = useQuery({
-    queryKey: ['leads', { page: 1, pageSize: 5 }],
-    queryFn: () => api.getLeads({ page: 1, pageSize: 5 }),
-  });
-
-  const { data: quotes } = useQuery({
-    queryKey: ['quotes', { page: 1, pageSize: 5 }],
-    queryFn: () => api.getQuotes({ page: 1, pageSize: 5 }),
-  });
+  const statCards = [
+    {
+      title: 'Total Customers',
+      value: stats?.totalCustomers || 0,
+      icon: Users,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100',
+    },
+    {
+      title: 'Active Leads',
+      value: stats?.activeLeads || 0,
+      icon: TrendingUp,
+      color: 'text-green-600',
+      bgColor: 'bg-green-100',
+    },
+    {
+      title: 'Quotes Issued',
+      value: stats?.quotesIssued || 0,
+      icon: FileText,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100',
+    },
+    {
+      title: 'Revenue (30d)',
+      value: `£${(stats?.revenue || 0).toLocaleString()}`,
+      icon: DollarSign,
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-100',
+    },
+    {
+      title: 'Upcoming Appointments',
+      value: stats?.upcomingAppointments || 0,
+      icon: Calendar,
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-100',
+    },
+    {
+      title: 'Completed Surveys',
+      value: stats?.completedSurveys || 0,
+      icon: Activity,
+      color: 'text-pink-600',
+      bgColor: 'bg-pink-100',
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="border-b bg-white">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold">PHM</h1>
-            <nav className="flex gap-4">
-              <Link
-                to="/dashboard"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                Dashboard
-              </Link>
-              <Link
-                to="/customers"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                Customers
-              </Link>
-              <Link
-                to="/leads"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                Leads
-              </Link>
-              <Link
-                to="/products"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                Products
-              </Link>
-              <Link
-                to="/quotes"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                Quotes
-              </Link>
-            </nav>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-700">{user?.name}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => logoutMutation.mutate()}
-            >
-              Logout
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-gray-600">Welcome to Project Hail Mary</p>
+      </div>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold">Dashboard</h2>
-          <p className="text-gray-600">Welcome back, {user?.name}</p>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Customers
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {customers?.pagination.total || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Active customer accounts
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Active Leads
-              </CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {leads?.pagination.total || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                In pipeline
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Quotes
-              </CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {quotes?.pagination.total || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Total quotes created
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Products
-              </CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">
-                In catalog
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Customers</CardTitle>
-              <CardDescription>
-                Latest customer records
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {customers?.data.length ? (
-                <div className="space-y-2">
-                  {customers.data.map((customer) => (
-                    <div
-                      key={customer.id}
-                      className="flex items-center justify-between border-b pb-2"
-                    >
-                      <div>
-                        <p className="font-medium">
-                          {customer.firstName} {customer.lastName}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {customer.postcode}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {statCards.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={stat.title} className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
+                  <p className="text-3xl font-bold">{stat.value}</p>
                 </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No customers yet
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Quotes</CardTitle>
-              <CardDescription>
-                Latest quote activity
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {quotes?.data.length ? (
-                <div className="space-y-2">
-                  {quotes.data.map((quote) => (
-                    <div
-                      key={quote.id}
-                      className="flex items-center justify-between border-b pb-2"
-                    >
-                      <div>
-                        <p className="font-medium">{quote.quoteNumber}</p>
-                        <p className="text-sm text-gray-600">
-                          {quote.status}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                <div className={`${stat.bgColor} p-3 rounded-lg`}>
+                  <Icon className={`h-6 w-6 ${stat.color}`} />
                 </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No quotes yet
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </main>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Recent Quotes</h2>
+          <div className="space-y-3">
+            {recentActivity?.quotes?.map((quote: any) => (
+              <Link key={quote.id} to={`/quotes/${quote.id}`}>
+                <div className="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                  <div>
+                    <p className="font-medium">{quote.quoteNumber}</p>
+                    <p className="text-sm text-gray-600">
+                      {new Date(quote.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">£{parseFloat(quote.total || 0).toFixed(2)}</p>
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        quote.status === 'accepted'
+                          ? 'bg-green-100 text-green-800'
+                          : quote.status === 'sent'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {quote.status}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+
+            {(!recentActivity?.quotes || recentActivity.quotes.length === 0) && (
+              <p className="text-gray-400 text-center py-4">No recent quotes</p>
+            )}
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Upcoming Appointments</h2>
+          <div className="space-y-3">
+            {recentActivity?.appointments?.map((appointment: any) => (
+              <div key={appointment.id} className="p-3 bg-gray-50 rounded-lg">
+                <div className="flex justify-between">
+                  <div>
+                    <p className="font-medium capitalize">
+                      {appointment.appointmentType?.replace('_', ' ')}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {new Date(appointment.scheduledStart).toLocaleString()}
+                    </p>
+                  </div>
+                  <span
+                    className={`text-xs px-2 py-1 rounded h-fit ${
+                      appointment.status === 'confirmed'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-blue-100 text-blue-800'
+                    }`}
+                  >
+                    {appointment.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+
+            {(!recentActivity?.appointments || recentActivity.appointments.length === 0) && (
+              <p className="text-gray-400 text-center py-4">No upcoming appointments</p>
+            )}
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }
