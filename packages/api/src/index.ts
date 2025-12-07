@@ -12,6 +12,13 @@ import customersRoutes from './routes/customers.js';
 import leadsRoutes from './routes/leads.js';
 import productsRoutes from './routes/products.js';
 import quotesRoutes from './routes/quotes.js';
+import appointmentsRoutes from './routes/appointments.js';
+import visitsRoutes from './routes/visits.js';
+import transcriptionRoutes from './routes/transcription.js';
+import mediaRoutes from './routes/media.js';
+import boilersRoutes from './routes/boilers.js';
+import dashboardRoutes from './routes/dashboard.js';
+import usersRoutes from './routes/users.js';
 
 // Load environment variables
 dotenv.config({ path: '../../.env' });
@@ -40,6 +47,13 @@ app.route('/api/customers', customersRoutes);
 app.route('/api/leads', leadsRoutes);
 app.route('/api/products', productsRoutes);
 app.route('/api/quotes', quotesRoutes);
+app.route('/api/appointments', appointmentsRoutes);
+app.route('/api/visits', visitsRoutes);
+app.route('/api/transcription', transcriptionRoutes);
+app.route('/api/media', mediaRoutes);
+app.route('/api/boilers', boilersRoutes);
+app.route('/api/dashboard', dashboardRoutes);
+app.route('/api/users', usersRoutes);
 
 // 404 handler
 app.notFound((c) => {
