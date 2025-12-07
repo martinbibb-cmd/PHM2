@@ -6,6 +6,7 @@ import { authenticate } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { eq, and, desc } from 'drizzle-orm';
 import { AppError } from '../utils/errors.js';
+import { randomUUID } from 'crypto';
 
 const app = new Hono();
 
@@ -496,6 +497,39 @@ app.get('/:id/transcriptions', async (c) => {
     .orderBy(transcriptions.recordedAt);
 
   return c.json({ transcriptions: transcriptionRecords });
+});
+
+// POST /api/visits/:id/share - Generate shareable link for customer
+app.post('/:id/share', async (c) => {
+  const user = c.get('user');
+  const visitId = parseInt(c.req.param('id'));
+
+  // Verify visit belongs to account
+  const [visit] = await db
+    .select()
+    .from(visitSessions)
+    .where(
+      and(
+        eq(visitSessions.id, visitId),
+        eq(visitSessions.accountId, user.accountId)
+      )
+    );
+
+  if (!visit) {
+    throw new AppError('Visit session not found', 404);
+  }
+
+  // Generate shareId if it doesn't exist
+  let shareId = visit.shareId;
+  if (!shareId) {
+    shareId = randomUUID();
+    await db
+      .update(visitSessions)
+      .set({ shareId })
+      .where(eq(visitSessions.id, visitId));
+  }
+
+  return c.json({ shareId, shareUrl: `/view/${shareId}` });
 });
 
 export default app;
