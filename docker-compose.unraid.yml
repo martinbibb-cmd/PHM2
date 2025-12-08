@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: phm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: phm
+      POSTGRES_USER: phm
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      # Map to Unraid share - adjust path as needed
+      - /mnt/user/appdata/phm/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U phm -d phm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - phm-network
+
+  # Database initialization service - runs once to setup DB
+  db-init:
+    image: node:20-alpine
+    container_name: phm-db-init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://phm:${DB_PASSWORD}@postgres:5432/phm
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+    volumes:
+      - ./packages/api:/app
+      - ./packages/shared:/shared
+      - /mnt/user/appdata/phm/init-flag:/data
+    working_dir: /app
+    command: >
+      sh -c "
+        if [ -f /data/.db-initialized ]; then
+          echo '✅ Database already initialized, skipping...';
+          exit 0;
+        fi &&
+        echo '📦 Installing dependencies...' &&
+        npm install &&
+        echo '🔄 Running database migrations...' &&
+        npm run db:migrate &&
+        echo '🌱 Seeding database...' &&
+        npm run db:seed &&
+        echo '✅ Database initialization complete!' &&
+        touch /data/.db-initialized
+      "
+    networks:
+      - phm-network
+
+  api:
+    build:
+      context: .
+      dockerfile: packages/api/Dockerfile
+    image: phm-api:latest
+    container_name: phm-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://phm:${DB_PASSWORD}@postgres:5432/phm
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      BASE_URL: ${BASE_URL:-http://localhost:3000}
+    volumes:
+      # Persistent storage for uploads
+      - /mnt/user/appdata/phm/uploads:/app/uploads
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - phm-network
+
+  web:
+    build:
+      context: .
+      dockerfile: packages/web/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+    image: phm-web:latest
+    container_name: phm-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      API_PROXY_URL: http://api:3001
+    ports:
+      - "${WEB_PORT:-3000}:80"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - phm-network
+
+networks:
+  phm-network:
+    driver: bridge
+
+# Note: Using bind mounts to Unraid appdata directory for persistence
+# Adjust paths like /mnt/user/appdata/phm/* to match your Unraid setup

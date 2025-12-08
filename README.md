@@ -47,6 +47,79 @@ A modern, production-ready **heating industry CRM and surveying platform** built
 - npm 10+
 - Docker & Docker Compose (for containerized deployment)
 
+## 🚀 Unraid One-Command Setup (Recommended for NAS)
+
+The easiest way to deploy PHM on Unraid or any NAS system:
+
+### Quick Installation
+
+1. **Clone the repository** (via Unraid terminal/SSH):
+
+```bash
+cd /mnt/user/appdata
+git clone <repository-url> phm
+cd phm
+```
+
+2. **Run the setup script** (one command!):
+
+```bash
+bash scripts/setup-unraid.sh
+```
+
+That's it! The script will:
+- ✅ Auto-generate secure passwords
+- ✅ Create all necessary directories
+- ✅ Initialize and seed the database
+- ✅ Build and start all services
+- ✅ Display your login credentials
+
+### What You Get
+
+After running the setup script:
+
+- **Web Interface**: `http://YOUR-SERVER-IP:3000`
+- **API Endpoint**: `http://YOUR-SERVER-IP:3001`
+- **Auto-configured**: Database migrations and seed data
+- **Persistent Storage**: All data stored in `/mnt/user/appdata/phm/`
+
+### Unraid-Specific Features
+
+- **Health Checks**: Automatic container health monitoring
+- **Auto-restart**: Containers restart unless manually stopped
+- **Init Container**: Database automatically initialized on first run
+- **Data Persistence**: Postgres data and uploads stored on Unraid array
+- **Secure by Default**: Auto-generated 32+ character passwords
+
+### Useful Commands
+
+```bash
+# View logs
+docker-compose -f docker-compose.unraid.yml logs -f
+
+# Stop services
+docker-compose -f docker-compose.unraid.yml down
+
+# Restart services
+docker-compose -f docker-compose.unraid.yml restart
+
+# Update to latest version
+cd /mnt/user/appdata/phm
+git pull
+bash scripts/setup-unraid.sh
+
+# Check service status
+docker-compose -f docker-compose.unraid.yml ps
+```
+
+### Data Backup
+
+Your data is stored in:
+- **Database**: `/mnt/user/appdata/phm/postgres/`
+- **Uploads**: `/mnt/user/appdata/phm/uploads/`
+
+**Important**: Back up these directories regularly!
+
 ### Development Setup
 
 1. **Clone the repository**
