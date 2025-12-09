@@ -57,7 +57,7 @@ The easiest way to deploy PHM on Unraid or any NAS system:
 
 ```bash
 cd /mnt/user/appdata
-git clone <repository-url> phm
+git clone https://github.com/martinbibb-cmd/PHM2.git phm
 cd phm
 ```
 
@@ -125,7 +125,7 @@ Your data is stored in:
 1. **Clone the repository**
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/martinbibb-cmd/PHM2.git
 cd PHM2
 ```
 
@@ -428,4 +428,4 @@ MIT
 
 ## Support
 
-For issues and questions, please open an issue on GitHub.
+For issues and questions, please open an issue on [GitHub](https://github.com/martinbibb-cmd/PHM2/issues).

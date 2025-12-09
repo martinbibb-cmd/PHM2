@@ -6,7 +6,7 @@ Complete guide for deploying PHM on Unraid NAS in one command.
 
 ```bash
 cd /mnt/user/appdata
-git clone <repository-url> phm
+git clone https://github.com/martinbibb-cmd/PHM2.git phm
 cd phm
 bash scripts/setup-unraid.sh
 ```
@@ -67,7 +67,7 @@ cd /mnt/user/appdata
 ### Step 3: Clone Repository
 
 ```bash
-git clone https://github.com/your-username/PHM2.git phm
+git clone https://github.com/martinbibb-cmd/PHM2.git phm
 cd phm
 ```
 
