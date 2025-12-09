@@ -24,6 +24,17 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
+
+    /* Cognitive Profile Variables */
+    --font-family-body: system-ui, -apple-system, sans-serif;
+    --font-family-heading: system-ui, -apple-system, sans-serif;
+    --button-padding: 0.5rem 1rem;
+    --button-min-height: 2.5rem;
+    --focus-border-width: 2px;
+    --line-height: 1.5;
+    --letter-spacing: normal;
+    --content-max-width: 100%;
+    --animation-duration: 150ms;
   }
 
   .dark {
@@ -55,5 +66,154 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-family-body);
+    line-height: var(--line-height);
+    letter-spacing: var(--letter-spacing);
   }
+}
+
+/* Laser Focus (ADHD) Profile */
+.cognitive-profile-laser-focus {
+  --animation-duration: 300ms;
+  --focus-border-width: 3px;
+}
+
+.cognitive-profile-laser-focus * {
+  transition-duration: var(--animation-duration) !important;
+}
+
+/* Clarity (Dyslexia) Profile */
+.cognitive-profile-clarity {
+  --font-family-body: 'OpenDyslexic', 'Comic Sans MS', sans-serif;
+  --font-family-heading: 'OpenDyslexic', 'Comic Sans MS', sans-serif;
+  --line-height: 1.8;
+  --letter-spacing: 0.02em;
+  --button-padding: 0.75rem 1.5rem;
+  --button-min-height: 3rem;
+}
+
+.cognitive-profile-clarity button,
+.cognitive-profile-clarity a,
+.cognitive-profile-clarity input,
+.cognitive-profile-clarity select {
+  padding: var(--button-padding) !important;
+  min-height: var(--button-min-height) !important;
+}
+
+/* Calm (Anxiety) Profile */
+.cognitive-profile-calm {
+  --primary: 210 40% 50%;
+  --destructive: 30 60% 50%;
+  --accent: 210 30% 85%;
+  --animation-duration: 400ms;
+}
+
+.cognitive-profile-calm * {
+  transition-duration: var(--animation-duration) !important;
+}
+
+/* Reading Ruler (Dyslexia) */
+.reading-ruler {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 3rem;
+  pointer-events: none;
+  z-index: 9999;
+  transition: top 0.1s ease-out;
+}
+
+.reading-ruler::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 200, 0.2),
+    rgba(255, 255, 200, 0.3),
+    rgba(255, 255, 200, 0.2)
+  );
+  border-top: 1px solid rgba(100, 100, 0, 0.3);
+  border-bottom: 1px solid rgba(100, 100, 0, 0.3);
+}
+
+/* Bionic Reading */
+.bionic-word {
+  font-weight: inherit;
+}
+
+.bionic-word strong {
+  font-weight: 700;
+}
+
+/* Focus Mode Overlay */
+.focus-mode-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 40;
+  animation: fadeIn 300ms ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Parking Lot */
+.parking-lot {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 50;
+}
+
+/* Gamification Effects */
+@keyframes confetti {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.confetti-particle {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  z-index: 9999;
+  pointer-events: none;
+  animation: confetti 2s ease-out forwards;
+}
+
+/* Confirmation Button (Hold to confirm) */
+.confirm-button-hold {
+  position: relative;
+  overflow: hidden;
+}
+
+.confirm-button-hold::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--hold-progress, 0%);
+  background: rgba(255, 255, 255, 0.3);
+  transition: width 50ms linear;
+  pointer-events: none;
 }
